@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>福州学院 · 我的课程表</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='38' font-family='sans-serif' font-weight='bold' fill='%23fff' text-anchor='middle'%3E%E8%AF%BE%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">课</div>
+    <div class="brand-text">
+      <h1>福州学院 · 课程表助手</h1>
+      <p id="brandSub">2026—2027 学年 秋季学期 · 共 <span id="statWeeks">-</span> 个教学周 / <span id="statCourses">-</span> 门课程</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab" data-view="home">首页</button>
+    <button class="tab" data-view="master">总课程表</button>
+    <button class="tab" data-view="mine">我的课程表</button>
+    <button class="tab" data-view="output">输出课表</button>
+  </nav>
+  <div class="topbar-right">
+    <label class="quick-color" title="一键更换主题色">
+      <span>主题色</span>
+      <input type="color" id="quickBrand" value="#2563eb">
+    </label>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= 首页 ================= -->
+  <section class="view" id="view-home">
+    <div class="hero hero-slim">
+      <h2>制定你的专属课表</h2>
+    </div>
+
+    <div class="cards">
+      <button class="card card-1" data-goto="master">
+        <div class="card-icon">表</div>
+        <h3>1 · 查看总课程表</h3>
+        <p>按教学周浏览学院这学期的全部课程安排，也可以直接看课程清单，随时搜索课程、老师和上课地点。</p>
+        <span class="card-more">进入查看 →</span>
+      </button>
+
+      <button class="card card-2" data-goto="mine">
+        <div class="card-icon">选</div>
+        <h3>2 · 制定我的课程表</h3>
+        <p>用勾选和下拉选项的方式添加课程：从总课表挑选，或自定义课程名称、星期、节次、周次与地点。</p>
+        <span class="card-more">开始制定 →</span>
+      </button>
+
+      <button class="card card-3" data-goto="output">
+        <div class="card-icon">出</div>
+        <h3>3 · 输出个人课程表</h3>
+        <p>生成七天 × 十二节的专属课表，格子里写清课程名称、开课周次、上课地点，配色样式随你 DIY，并可一键导出图片。</p>
+        <span class="card-more">生成课表 →</span>
+      </button>
+    </div>
+
+    <div class="tip-box">
+      <strong>小提示</strong>
+      <span>第一次使用建议先进入「制定我的课程表」，勾选你的课程；之后再打开「输出课表」，一切都会自动排好。你的选择会自动保存在本机浏览器里。</span>
+    </div>
+  </section>
+
+  <!-- ================= 总课程表 ================= -->
+  <section class="view" id="view-master">
+    <div class="section-head">
+      <div>
+        <h2>查看总课程表</h2>
+        <p class="muted">数据来源于学院《福州学院课表汇总》，共 <span id="masterCount">-</span> 条排课记录。</p>
+      </div>
+      <div class="seg" id="masterMode">
+        <button class="seg-btn active" data-mode="week">按周浏览</button>
+        <button class="seg-btn" data-mode="list">课程清单</button>
+      </div>
+    </div>
+
+    <!-- 按周浏览 -->
+    <div id="masterWeekPane">
+      <div class="weekbar">
+        <button class="round-btn" id="weekPrev" title="上一周">‹</button>
+        <div class="weekstrip" id="weekStrip"></div>
+        <button class="round-btn" id="weekNext" title="下一周">›</button>
+      </div>
+      <div class="legend" id="masterLegend"></div>
+      <div class="grid-wrap">
+        <div class="schedule" id="masterGrid"></div>
+      </div>
+    </div>
+
+    <!-- 课程清单 -->
+    <div id="masterListPane" hidden>
+      <div class="tools">
+        <input type="search" id="masterSearch" class="input" placeholder="搜索课程名称、教师、地点，例如「深度学习」（支持模糊匹配）">
+        <select id="masterSort" class="input select">
+          <option value="weeks">按开课周次排序</option>
+          <option value="name">按课程名称排序</option>
+          <option value="day">按上课星期排序</option>
+        </select>
+      </div>
+      <div class="catalog" id="masterCatalog"></div>
+    </div>
+  </section>
+
+  <!-- ================= 制定我的课程表 ================= -->
+  <section class="view" id="view-mine">
+    <div class="section-head">
+      <div>
+        <h2>制定我的课程表</h2>
+        <p class="muted">勾选你要上的课，或者用下面的选项手动添加一门自定义课程。</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost" id="pickAll">全选当前结果</button>
+        <button class="btn ghost" id="clearPicked">清空已选</button>
+      </div>
+    </div>
+
+    <div class="mine-layout">
+      <!-- 左：从总课表选择 -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>从总课表选择</h3>
+          <span class="badge" id="pickCount">已选 0 门</span>
+        </div>
+        <div class="tools">
+          <input type="search" id="pickSearch" class="input" placeholder="搜索课程 / 教师 / 班级 / 地点（支持模糊匹配，如「工应英」）">
+          <select id="pickFilter" class="input select">
+            <option value="all">全部课程</option>
+            <option value="hasCls">仅带班级的课程</option>
+            <option value="hasWeeks">≥ 8 周的课程</option>
+            <option value="picked">只看已选</option>
+          </select>
+        </div>
+        <div class="picklist" id="pickList"></div>
+      </div>
+
+      <!-- 右：自定义 + 已选 -->
+      <div class="side">
+        <div class="panel form-panel">
+          <div class="panel-head">
+            <h3>手动添加自定义课程</h3>
+            <span class="badge soft">选项式填写</span>
+          </div>
+          <form class="form" id="customForm">
+            <div class="field field-full">
+              <label>课程名称</label>
+              <input type="text" id="cName" class="input" placeholder="例如：创新创业实践" maxlength="24">
+            </div>
+            <div class="field">
+              <label>上课星期</label>
+              <select id="cDay" class="input select"></select>
+            </div>
+            <div class="field">
+              <label>上课地点</label>
+              <input type="text" id="cLoc" class="input" placeholder="例如：教学楼226" maxlength="24">
+            </div>
+            <div class="field">
+              <label>开始节次</label>
+              <select id="cStart" class="input select"></select>
+            </div>
+            <div class="field">
+              <label>结束节次</label>
+              <select id="cEnd" class="input select"></select>
+            </div>
+            <div class="field">
+              <label>起始周</label>
+              <select id="cWeekFrom" class="input select"></select>
+            </div>
+            <div class="field">
+              <label>结束周</label>
+              <select id="cWeekTo" class="input select"></select>
+            </div>
+            <div class="field">
+              <label>任课教师（选填）</label>
+              <input type="text" id="cTeacher" class="input" placeholder="选填" maxlength="16">
+            </div>
+            <div class="field">
+              <label>课程颜色</label>
+              <input type="color" id="cColor" class="input color" value="#4f7cff">
+            </div>
+            <button type="submit" class="btn primary form-submit">添加到我的课程表</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>我的课程（<span id="myCount">0</span>）</h3>
+            <span class="badge soft">颜色可单独调整</span>
+          </div>
+          <div class="mylist" id="myList"></div>
+        </div>
+
+        <div class="panel hint-panel">
+          <h3>排课冲突提醒</h3>
+          <div id="conflictBox" class="conflict-ok">暂无冲突，时间安排很清爽。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 输出个人课程表 ================= -->
+  <section class="view" id="view-output">
+    <div class="section-head">
+      <div>
+        <h2>输出个人课程表</h2>
+        <p class="muted">七天 × 十二节，每个格子里写清楚课程名称、开课周次和上课地点。</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost" id="toggleDiy">外观 DIY</button>
+        <button class="btn primary" id="exportPng">一键导出图片</button>
+      </div>
+    </div>
+
+    <!-- DIY 面板 -->
+    <div class="diy" id="diyPanel" hidden>
+      <div class="diy-grid">
+        <div class="diy-block">
+          <h4>课表标题</h4>
+          <input type="text" id="dTitle" class="input" value="我的课程表" maxlength="30">
+          <input type="text" id="dSub" class="input" placeholder="副标题，例如：姓名 / 学号（选填）" maxlength="40">
+        </div>
+        <div class="diy-block">
+          <h4>主题色</h4>
+          <div class="swatches" id="brandSwatches"></div>
+        </div>
+        <div class="diy-block">
+          <h4>课表配色方案</h4>
+          <div class="swatches palette" id="paletteList"></div>
+          <p class="diy-note">切换方案会立即重排所有课程配色；在「我的课程表」里单独调过颜色的课程会保留原色。</p>
+        </div>
+        <div class="diy-block">
+          <h4>背景风格</h4>
+          <div class="swatches" id="bgList"></div>
+        </div>
+        <div class="diy-block">
+          <h4>表格尺寸（可自由拖动）</h4>
+          <div class="range-row">
+            <span>宽度</span>
+            <input type="range" id="dWidth" min="70" max="200" step="1" value="100" aria-label="表格宽度">
+            <em id="dWidthVal">100%</em>
+          </div>
+          <div class="range-row">
+            <span>每节行高</span>
+            <input type="range" id="dRowH" min="34" max="120" step="2" value="58" aria-label="每节行高">
+            <em id="dRowHVal">58px</em>
+          </div>
+          <div class="range-row">
+            <span>字号</span>
+            <input type="range" id="dFont" min="10" max="20" step="0.5" value="13.5" aria-label="课表字号">
+            <em id="dFontVal">13.5px</em>
+          </div>
+          <p class="diy-note">宽度 100% 即横向占满整个网页；同一格子里有重叠课程时，调宽能让它们各占更宽的位置。</p>
+        </div>
+        <div class="diy-block">
+          <h4>圆角</h4>
+          <select id="dRadius" class="input select">
+            <option value="0">直角</option>
+            <option value="6">小圆角</option>
+            <option value="14" selected>标准圆角</option>
+            <option value="999">胶囊</option>
+          </select>
+          <button class="btn ghost small" id="dSizeReset" style="margin-top:10px;width:100%">恢复默认尺寸</button>
+        </div>
+        <div class="diy-block">
+          <h4>格子里显示</h4>
+          <div class="checks" id="dToggles">
+            <label><input type="checkbox" data-k="teacher" checked>任课教师</label>
+            <label><input type="checkbox" data-k="loc" checked>上课地点</label>
+            <label><input type="checkbox" data-k="weeks" checked>开课时间周</label>
+            <label><input type="checkbox" data-k="cls" checked>班级</label>
+            <label><input type="checkbox" data-k="empty" checked>无课标记</label>
+          </div>
+        </div>
+      </div>
+      <div class="diy-foot">
+        <button class="btn ghost small" id="resetDiy">恢复默认样式</button>
+        <span class="muted small">样式设置会连同课程一起自动保存在本机。</span>
+      </div>
+    </div>
+
+    <div class="outbar">
+      <div class="outbar-left">
+        <label class="inline-label">查看范围</label>
+        <select id="outWeek" class="input select"></select>
+      </div>
+      <div class="outbar-right">
+        <span class="chip" id="outSummary"></span>
+      </div>
+    </div>
+
+    <div class="grid-wrap out" id="outWrap">
+      <div id="outSheet" class="out-sheet">
+        <div class="out-title">
+          <h3 id="outTitle">我的课程表</h3>
+          <p id="outSub"></p>
+        </div>
+        <div class="schedule" id="outGrid"></div>
+        <div class="out-foot" id="outFoot"></div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="outEmpty" hidden>
+      <h3>还没有选择任何课程</h3>
+      <p>先到「我的课程表」里勾选几门课，或者手动添加一门，这里就会立刻生成你的专属课表。</p>
+      <button class="btn primary" data-goto="mine">去制定我的课程表</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>福州学院 · 课程表助手</span>
+  <span>数据来源：<a href="https://docs.qq.com/sheet/DRHB4Y3VJVktWak5S" target="_blank" rel="noopener">福州学院课表汇总</a>（本地解析，不上传任何数据）</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/export.js"></script>
+</body>
+</html>
